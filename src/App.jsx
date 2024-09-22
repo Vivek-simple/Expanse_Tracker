@@ -4,13 +4,16 @@ import ExpenseForm from "./components/ExpenseForm";
 import UseRefHookUse from "./components/UseRefHookUse";
 import ExpenseTable from "./components/ExpenseTable";
 import data from "./data";
+import { useStorage } from "./hooks/useStorage";
 function App() {
-  const [Expenses, setExpenses] = useState(data);
-  const [expense, setExpense] = useState({
+  const [editing, setEditing] = useStorage("editing", "");
+  const [Expenses, setExpenses] = useStorage("Expenses", data);
+  const [expense, setExpense] = useStorage("expense", {
     title: "",
     category: "",
     amount: "",
   });
+
   return (
     <main>
       <h1>Track Your Expense</h1>
@@ -19,13 +22,15 @@ function App() {
           setExpenses={setExpenses}
           expense={expense}
           setExpense={setExpense}
+          editing={editing}
+          setEditing={setEditing}
         />
         {/* <UseRefHookUse setExpenses={setExpenses} setTotal={setTotal} /> */}
         <ExpenseTable
           Expenses={Expenses}
           setExpenses={setExpenses}
-          expense={expense}
           setExpense={setExpense}
+          setEditing={setEditing}
         />
       </div>
     </main>

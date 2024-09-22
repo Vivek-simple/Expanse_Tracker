@@ -6,6 +6,8 @@ function ContextMenu({
   clickedId,
   setExpenses,
   setExpense,
+  Expenses,
+  setEditing,
 }) {
   const Delete = () => {
     setContextMenu({});
@@ -16,9 +18,11 @@ function ContextMenu({
 
   const Edit = () => {
     setContextMenu({});
-    setExpenses((prevState) =>
-      prevState.filter((expense) => expense.id != clickedId)
+    const { title, category, amount } = Expenses.find(
+      (data) => data.id == clickedId
     );
+    setExpense({ title, category, amount });
+    setEditing(clickedId);
   };
 
   if (!contextMenu.left) return;

@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import Input from "./Input";
 import Select from "./Select";
 
-function ExpenseForm({ setExpenses, expense, setExpense }) {
+function ExpenseForm({
+  setExpenses,
+  expense,
+  setExpense,
+  editing,
+  setEditing,
+}) {
   // function submit(e){
   //   e.preventDefault();
   //   const expense={...getFormData(e.target),id:crypto.randomUUID()};
@@ -39,7 +45,6 @@ function ExpenseForm({ setExpenses, expense, setExpense }) {
 
   // we can do all in one state
   const [error, setError] = useState({});
-
   const validateConfig = {
     title: [
       { required: "true", message: "title is required" },
@@ -54,7 +59,7 @@ function ExpenseForm({ setExpenses, expense, setExpense }) {
 
   function checkValidate(formData) {
     const errorData = {};
-    Object.entries(formData).forEach(([key, value]) =>
+    Object.entries(formData).forEach(([key, value]) => {
       validateConfig[key].some((rule) => {
         if (rule.required && !value) {
           errorData[key] = rule.message;
@@ -70,8 +75,9 @@ function ExpenseForm({ setExpenses, expense, setExpense }) {
           errorData[key] = rule.message;
           return true;
         }
-      })
-    );
+      });
+    });
+
     setError(errorData);
     return errorData;
   }
@@ -80,10 +86,25 @@ function ExpenseForm({ setExpenses, expense, setExpense }) {
     e.preventDefault();
     const foundData = checkValidate(expense);
     if (Object.keys(foundData).length) return;
-    setExpenses((prevState) => [
-      ...prevState,
-      { ...expense, id: crypto.randomUUID() },
-    ]);
+    {
+      editing
+        ? setExpenses((prevState) =>
+            prevState.map(
+              (ele) =>
+                ele.id === editing
+                  ? {
+                      ...ele,
+                      ...expense,
+                    } // Update the title of the matching expense
+                  : ele //Keep other expenses unchanged
+            )
+          )
+        : setExpenses((prevState) => [
+            ...prevState,
+            { ...expense, id: crypto.randomUUID() },
+          ]);
+    }
+    setEditing("");
     setExpense({
       title: "",
       category: "",
@@ -128,7 +149,7 @@ function ExpenseForm({ setExpenses, expense, setExpense }) {
         onChange={add}
         error={error.amount}
       />
-      <button className="add-btn">Add</button>
+      <button className="add-btn">{editing ? "Save" : "Add"}</button>
     </form>
   );
 }

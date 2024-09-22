@@ -130,6 +130,10 @@ main {
     background-color: #ddd;
 }
 
+.clear{
+    cursor: pointer;
+}
+
 @media (max-width: 900px) {
     body {
         margin-inline: 16px;

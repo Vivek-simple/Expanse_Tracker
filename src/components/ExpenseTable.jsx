@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useFilter } from "../hooks/useFilter";
+import { useStorage } from "../hooks/useStorage";
 import ContextMenu from "./ContextMenu";
 
-function ExpenseTable({ Expenses, setExpenses, expense, setExpense }) {
+function ExpenseTable({ Expenses, setExpenses, setExpense, setEditing }) {
   const [filterData, setQuery] = useFilter(Expenses, (data) => data.category);
-  const [contextMenu, setContextMenu] = useState({});
+  const [contextMenu, setContextMenu] = useStorage("contextMenu", {});
   const [clickedId, setClickedId] = useState("");
+  const [sortCallback, setSortCallback] = useState(() => () => {});
 
   let total = filterData.reduce(
     (acc, curr) => (acc = acc + Number(curr.amount)),
     0
   );
 
-  // console.log(filterData);
   return (
     <>
       <ContextMenu
@@ -21,8 +22,15 @@ function ExpenseTable({ Expenses, setExpenses, expense, setExpense }) {
         clickedId={clickedId}
         setExpenses={setExpenses}
         setExpense={setExpense}
+        Expenses={Expenses}
+        setEditing={setEditing}
       />
-      <table className="expense-table" onClick={() => setContextMenu({})}>
+      <table
+        className="expense-table"
+        onClick={() => {
+          if (contextMenu.left) setContextMenu({});
+        }}
+      >
         <thead>
           <tr>
             <th>Title</th>
@@ -44,6 +52,9 @@ function ExpenseTable({ Expenses, setExpenses, expense, setExpense }) {
                   width="10"
                   viewBox="0 0 384 512"
                   className="arrow up-arrow"
+                  onClick={() =>
+                    setSortCallback(() => (a, b) => a.amount - b.amount)
+                  }
                 >
                   <title>Ascending</title>
                   <path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z" />
@@ -53,6 +64,9 @@ function ExpenseTable({ Expenses, setExpenses, expense, setExpense }) {
                   width="10"
                   viewBox="0 0 384 512"
                   className="arrow down-arrow"
+                  onClick={() =>
+                    setSortCallback(() => (a, b) => b.amount - a.amount)
+                  }
                 >
                   <title>Descending</title>
                   <path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" />
@@ -62,7 +76,7 @@ function ExpenseTable({ Expenses, setExpenses, expense, setExpense }) {
           </tr>
         </thead>
         <tbody>
-          {filterData.map((expense) => (
+          {filterData.sort(sortCallback).map((expense) => (
             <tr
               key={expense.id}
               onContextMenu={(e) => {
@@ -78,7 +92,12 @@ function ExpenseTable({ Expenses, setExpenses, expense, setExpense }) {
           ))}
           <tr>
             <th>Total</th>
-            <th></th>
+            <th
+              className="clear"
+              onClick={() => setSortCallback(() => () => {})}
+            >
+              Clear Sort
+            </th>
             <th>₹{total}</th>
           </tr>
         </tbody>
